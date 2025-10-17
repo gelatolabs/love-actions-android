@@ -238,11 +238,17 @@ runs:
             "org.gradle.caching=true\n"
           )
           file.write(data)
+    - name: Get NDK version from love-android
+      id: get-ndk-version
+      shell: bash
+      run: |
+        NDK_VERSION=$(grep "ndkVersion" ${{ inputs.love-actions-folder }}/love-android/app/build.gradle | sed "s/.*ndkVersion '\(.*\)'.*/\1/")
+        echo "ndk-version=$NDK_VERSION" >> $GITHUB_OUTPUT
     - name: Cache NDK
       uses: actions/cache@v4
       with:
-        path: /usr/local/lib/android/sdk/ndk/25.2.9519653
-        key: ndk-25.2.9519653
+        path: /usr/local/lib/android/sdk/ndk/${{ steps.get-ndk-version.outputs.ndk-version }}
+        key: ndk-${{ steps.get-ndk-version.outputs.ndk-version }}
     - name: Build package (Debug)
       uses: burrunan/gradle-cache-action@v2
       with:
